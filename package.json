@@ -1,0 +1,42 @@
+{
+  "name": "ai-recon-bug-hunter",
+  "version": "1.0.0",
+  "description": "Advanced AI-powered reconnaissance bug hunter for 2026",
+  "main": "api/recon.js",
+  "scripts": {
+    "start": "node api/recon.js",
+    "dev": "nodemon api/recon.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^21.5.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "cheerio": "^1.0.0-rc.12",
+    "dns": "^0.2.2",
+    "whois": "^2.14.0",
+    "ssl-checker": "^2.0.7",
+    "cloudflare-scraper": "^2.0.0",
+    "tls-client": "^1.0.0",
+    "subdomain-enum": "^2.0.0",
+    "shodan-client": "^1.2.1",
+    "censys-search": "^1.0.0",
+    "binaryedge-client": "^1.0.0",
+    "virustotal-api": "^3.0.0",
+    "securitytrails-api": "^1.0.0",
+    "chaos-client": "^1.0.0",
+    "wayback-machine": "^1.0.0",
+    "github-dorking": "^1.0.0",
+    "google-dorks": "^2.0.0",
+    "redis": "^4.6.8",
+    "bull": "^4.11.5",
+    "openai": "^4.20.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
