@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recon Holodeck 2026</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #0066ff;
+            --background: #0a0a0f;
+            --surface: #1a1a2a;
+            --text: #ffffff;
+            --error: #ff3366;
+            --warning: #ffaa33;
+            --success: #33ff99;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--background);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            cursor: none;
+        }
+
+        #holodeck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #gridCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #neuralCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #quantumCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .hud {
+            position: absolute;
+            z-index: 10;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        #top-hud {
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 20, 0.8);
+            border-radius: 10px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .scan-target {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #domainInput {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary);
+            color: var(--text);
+            padding: 10px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            width: 300px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #domainInput:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        #scanBtn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #scanBtn:hover {
+            background: var(--primary);
+            color: var(--background);
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        #left-hud {
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            border-radius: 10px;
+        }
+
+        #right-hud {
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            border-radius: 10px;
+        }
+
+        .hud-title {
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .metric-value {
+            color: var(--primary);
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary);
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .quantum-state {
+            margin-top: 20px;
+        }
+
+        .particle {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 2px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .status-message {
+            color: var(--primary);
+            font-size: 12px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: all 0.1s;
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        #results {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: var(--primary);
+        }
+
+        .result-line {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="holodeck">
+        <canvas id="gridCanvas"></canvas>
+        <canvas id="neuralCanvas"></canvas>
+        <canvas id="quantumCanvas"></canvas>
+        
+        <!-- HUD Elements -->
+        <div id="top-hud" class="hud">
+            <div class="logo">⟁ AI RECON HOLODECK 2026 ⟁</div>
+            <div class="scan-target">
+                <input type="text" id="domainInput" placeholder="ENTER TARGET DOMAIN" value="example.com">
+                <button id="scanBtn">INITIATE</button>
+            </div>
+            <div id="quantum-status">
+                <span class="particle"></span>
+                <span class="particle"></span>
+                <span class="particle"></span>
+                <span class="particle"></span>
+                <span class="particle"></span>
+            </div>
+        </div>
+
+        <div id="left-hud" class="hud">
+            <div class="hud-title">⟁ QUANTUM STATE</div>
+            <div class="metric">
+                <span>COHERENCE:</span>
+                <span class="metric-value" id="coherence">98.7%</span>
+            </div>
+            <div class="metric">
+                <span>ENTANGLEMENT:</span>
+                <span class="metric-value" id="entanglement">45.2%</span>
+            </div>
+            <div class="metric">
+                <span>SUPERPOSITION:</span>
+                <span class="metric-value" id="superposition">1.5e+6</span>
+            </div>
+            
+            <div class="quantum-state">
+                <div class="hud-title">⟁ PROBABILITY CLOUD</div>
+                <div id="probability-cloud">
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                </div>
+            </div>
+            
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <div class="status-message" id="status">AWAITING TARGET</div>
+        </div>
+
+        <div id="right-hud" class="hud">
+            <div class="hud-title">⟁ REAL-TIME RESULTS</div>
+            <div id="results"></div>
+        </div>
+
+        <div class="cursor"></div>
+    </div>
+
+    <script src="neural-interface.js"></script>
+    <script src="quantum-visualizer.js"></script>
+    <script>
+        // Initialize
+        const holodeck = {
+            grid: null,
+            neural: window.neuralInterface,
+            quantum: window.quantumVisualizer,
+            
+            init() {
+                this.initGrid();
+                this.initCursor();
+                this.initEventListeners();
+                this.animate();
+            },
+            
+            initGrid() {
+                const canvas = document.getElementById('gridCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                this.grid = { canvas, ctx };
+                
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            },
+            
+            initCursor() {
+                const cursor = document.querySelector('.cursor');
+                
+                document.addEventListener('mousemove', (e) => {
+                    cursor.style.left = e.clientX - 10 + 'px';
+                    cursor.style.top = e.clientY - 10 + 'px';
+                });
+            },
+            
+            initEventListeners() {
+                document.getElementById('scanBtn').addEventListener('click', () => this.startScan());
+                document.getElementById('domainInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.startScan();
+                });
+            },
+            
+            async startScan() {
+                const domain = document.getElementById('domainInput').value;
+                this.updateStatus(`INITIATING QUANTUM SCAN ON ${domain}`);
+                
+                try {
+                    const response = await fetch('/api/quantum-recon', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ domain })
+                    });
+                    
+                    const data = await response.json();
+                    this.processResults(data);
+                } catch (error) {
+                    this.updateStatus(`ERROR: ${error.message}`);
+                }
+            },
+            
+            processResults(data) {
+                // Update quantum visualizer
+                this.quantum.visualizeQuantumState(data);
+                
+                // Update HUD metrics
+                document.getElementById('coherence').textContent = 
+                    (Math.random() * 20 + 80).toFixed(1) + '%';
+                document.getElementById('entanglement').textContent = 
+                    (Math.random() * 50 + 25).toFixed(1) + '%';
+                document.getElementById('superposition').textContent = 
+                    (Math.floor(Math.random() * 1000000)).toLocaleString();
+                
+                // Display results
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+                
+                if (data.measurements) {
+                    data.measurements.slice(0, 20).forEach((m, i) => {
+                        const line = document.createElement('div');
+                        line.className = 'result-line';
+                        line.textContent = `[${new Date().toLocaleTimeString()}] ⟡ QUANTUM STATE ${i}: ${JSON.stringify(m).substring(0, 50)}...`;
+                        resultsDiv.appendChild(line);
+                    });
+                }
+                
+                this.updateStatus('SCAN COMPLETE - ANALYZING QUANTUM STATES');
+            },
+            
+            updateStatus(msg) {
+                document.getElementById('status').textContent = msg;
+            },
+            
+            animate() {
+                // Draw grid
+                this.drawGrid();
+                
+                // Update progress bar (random for demo)
+                const progress = Math.random() * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                
+                requestAnimationFrame(() => this.animate());
+            },
+            
+            drawGrid() {
+                const { ctx, canvas } = this.grid;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw perspective grid
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const spacing = 50;
+                
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+                ctx.lineWidth = 1;
+                
+                // Horizontal lines
+                for (let y = 0; y < canvas.height; y += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+                
+                // Vertical lines with perspective
+                for (let x = 0; x < canvas.width; x += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                
+                // Draw vanishing point
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        };
+        
+        // Start holodeck
+        holodeck.init();
+    </script>
+</body>
+</html>
