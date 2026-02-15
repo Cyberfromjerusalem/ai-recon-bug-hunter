@@ -35,6 +35,26 @@
     "redis": "^4.6.8",
     "bull": "^4.11.5",
     "openai": "^4.20.0"
+    "tor-request": "^2.0.0",
+    "i2p": "^1.0.0",
+    "freenet": "^0.1.0",
+    "web3": "^4.3.0",
+    "ethers": "^6.9.0",
+    "solc": "^0.8.0",
+    "ipfs-http-client": "^60.0.0",
+    "libp2p": "^1.0.0",
+    "orbit-db": "^0.28.0",
+    "gun": "^0.2020.1235",
+    "matrix-js-sdk": "^27.0.0",
+    "nostr-tools": "^1.0.0",
+    "activitypub": "^1.0.0",
+    "solid": "^1.8.0",
+    "holochain": "^0.3.0",
+    "radicle": "^0.1.0",
+    "scuttlebot": "^14.0.0",
+    "secure-scuttlebutt": "^19.0.0"
+  }
+}
   },
   "engines": {
     "node": "18.x"
