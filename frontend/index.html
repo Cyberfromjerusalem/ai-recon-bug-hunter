@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recon Bug Hunter 2026</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-bug"></i> AI Recon Bug Hunter 2026</h1>
+            <p class="subtitle">Advanced AI-powered reconnaissance for security researchers</p>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="input-group">
+                    <input type="text" id="domainInput" placeholder="Enter domain (e.g., example.com)" />
+                    <button id="scanBtn" class="btn-primary">
+                        <i class="fas fa-search"></i> Start Recon
+                    </button>
+                </div>
+                <div class="options-panel">
+                    <label>
+                        <input type="checkbox" id="deepScan" checked> Deep Scan
+                    </label>
+                    <label>
+                        <input type="checkbox" id="useAI" checked> AI Analysis
+                    </label>
+                    <label>
+                        <input type="checkbox" id="aggressiveMode"> Aggressive Mode
+                    </label>
+                </div>
+            </div>
+
+            <div id="progressContainer" class="progress-container hidden">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <p id="progressStatus">Initializing...</p>
+            </div>
+
+            <div id="results" class="results hidden">
+                <div class="results-header">
+                    <h2>Reconnaissance Results</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <span class="stat-value" id="totalSubdomains">0</span>
+                            <span class="stat-label">Total Subdomains</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="liveSubdomains">0</span>
+                            <span class="stat-label">Live</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="sensitiveFindings">0</span>
+                            <span class="stat-label">Sensitive Findings</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="riskScore">0</span>
+                            <span class="stat-label">Risk Score</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="subdomains">Subdomains</button>
+                    <button class="tab-btn" data-tab="sensitive">Sensitive Data</button>
+                    <button class="tab-btn" data-tab="analysis">AI Analysis</button>
+                    <button class="tab-btn" data-tab="visualization">Visualization</button>
+                </div>
+
+                <div id="subdomainsTab" class="tab-content active">
+                    <div class="subdomains-list" id="subdomainsList"></div>
+                </div>
+
+                <div id="sensitiveTab" class="tab-content">
+                    <div class="sensitive-list" id="sensitiveList"></div>
+                </div>
+
+                <div id="analysisTab" class="tab-content">
+                    <div class="ai-analysis" id="aiAnalysis"></div>
+                </div>
+
+                <div id="visualizationTab" class="tab-content">
+                    <div class="graph-container">
+                        <canvas id="subdomainGraph"></canvas>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <button id="exportJson" class="btn-secondary">
+                        <i class="fas fa-download"></i> Export JSON
+                    </button>
+                    <button id="exportPdf" class="btn-secondary">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
