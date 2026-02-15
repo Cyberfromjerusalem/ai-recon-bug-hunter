@@ -28,7 +28,6 @@
             color: var(--text);
             overflow: hidden;
             height: 100vh;
-            cursor: none;
         }
 
         #holodeck {
@@ -38,35 +37,18 @@
             overflow: hidden;
         }
 
-        #gridCanvas {
+        canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-        }
-
-        #neuralCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
             pointer-events: none;
         }
 
-        #quantumCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-            pointer-events: none;
-            mix-blend-mode: screen;
-        }
+        #gridCanvas { z-index: 1; }
+        #neuralCanvas { z-index: 2; }
+        #quantumCanvas { z-index: 3; mix-blend-mode: screen; }
 
         .hud {
             position: absolute;
@@ -76,6 +58,8 @@
             border: 1px solid var(--primary);
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
             backdrop-filter: blur(10px);
+            border-radius: 10px;
+            pointer-events: auto;
         }
 
         #top-hud {
@@ -86,7 +70,6 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(10, 10, 20, 0.8);
-            border-radius: 10px;
         }
 
         .logo {
@@ -139,18 +122,23 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
+        #scanBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         #left-hud {
             bottom: 20px;
             left: 20px;
             width: 300px;
-            border-radius: 10px;
         }
 
         #right-hud {
             bottom: 20px;
             right: 20px;
             width: 400px;
-            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .hud-title {
@@ -221,6 +209,44 @@
             50% { opacity: 0.5; }
         }
 
+        #results {
+            font-size: 11px;
+            color: var(--primary);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-line {
+            padding: 5px;
+            margin: 2px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+            animation: fadeIn 0.5s;
+            cursor: pointer;
+        }
+
+        .result-line:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .result-line.live {
+            border-left: 3px solid var(--success);
+        }
+
+        .result-line.dead {
+            border-left: 3px solid var(--error);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .subdomain-detail {
+            font-size: 10px;
+            color: var(--secondary);
+            margin-left: 10px;
+        }
+
         .cursor {
             position: fixed;
             width: 20px;
@@ -231,52 +257,32 @@
             z-index: 9999;
             mix-blend-mode: difference;
             transition: all 0.1s;
-        }
-
-        .cursor::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
             transform: translate(-50%, -50%);
-            width: 4px;
-            height: 4px;
-            background: var(--primary);
-            border-radius: 50%;
         }
 
-        #results {
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 11px;
+        .error-message {
+            color: var(--error);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
             color: var(--primary);
-        }
-
-        .result-line {
-            padding: 2px 0;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="holodeck">
-        <canvas id="gridCanvas"></canvas>
-        <canvas id="neuralCanvas"></canvas>
-        <canvas id="quantumCanvas"></canvas>
-        
         <!-- HUD Elements -->
         <div id="top-hud" class="hud">
-            <div class="logo">⟁ AI RECON HOLODECK 2026 ⟁</div>
+            <div class="logo">⚡ AI RECON HOLODECK 2026 ⚡</div>
             <div class="scan-target">
-                <input type="text" id="domainInput" placeholder="ENTER TARGET DOMAIN" value="example.com">
-                <button id="scanBtn">INITIATE</button>
+                <input type="text" id="domainInput" placeholder="Enter domain (e.g., example.com)" value="example.com">
+                <button id="scanBtn">SCAN</button>
             </div>
             <div id="quantum-status">
                 <span class="particle"></span>
@@ -288,42 +294,36 @@
         </div>
 
         <div id="left-hud" class="hud">
-            <div class="hud-title">⟁ QUANTUM STATE</div>
+            <div class="hud-title">⚡ QUANTUM STATE</div>
             <div class="metric">
-                <span>COHERENCE:</span>
-                <span class="metric-value" id="coherence">98.7%</span>
+                <span>STATUS:</span>
+                <span class="metric-value" id="status">READY</span>
             </div>
             <div class="metric">
-                <span>ENTANGLEMENT:</span>
-                <span class="metric-value" id="entanglement">45.2%</span>
+                <span>TOTAL SUBDOMAINS:</span>
+                <span class="metric-value" id="totalSubdomains">0</span>
             </div>
             <div class="metric">
-                <span>SUPERPOSITION:</span>
-                <span class="metric-value" id="superposition">1.5e+6</span>
+                <span>LIVE SUBDOMAINS:</span>
+                <span class="metric-value" id="liveSubdomains">0</span>
+            </div>
+            <div class="metric">
+                <span>SENSITIVE FINDINGS:</span>
+                <span class="metric-value" id="sensitiveFindings">0</span>
             </div>
             
             <div class="quantum-state">
-                <div class="hud-title">⟁ PROBABILITY CLOUD</div>
-                <div id="probability-cloud">
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
-                    <span class="particle"></span>
+                <div class="hud-title">⚡ PROGRESS</div>
+                <div id="progress-bar">
+                    <div id="progress-fill"></div>
                 </div>
             </div>
             
-            <div id="progress-bar">
-                <div id="progress-fill"></div>
-            </div>
-            <div class="status-message" id="status">AWAITING TARGET</div>
+            <div class="status-message" id="statusMessage">AWAITING TARGET</div>
         </div>
 
         <div id="right-hud" class="hud">
-            <div class="hud-title">⟁ REAL-TIME RESULTS</div>
+            <div class="hud-title">⚡ DISCOVERED ASSETS</div>
             <div id="results"></div>
         </div>
 
@@ -331,152 +331,216 @@
     </div>
 
     <script src="neural-interface.js"></script>
-    <script src="quantum-visualizer.js"></script>
     <script>
-        // Initialize
-        const holodeck = {
-            grid: null,
-            neural: window.neuralInterface,
-            quantum: window.quantumVisualizer,
+        // Grid Canvas
+        const gridCanvas = document.createElement('canvas');
+        gridCanvas.id = 'gridCanvas';
+        document.getElementById('holodeck').appendChild(gridCanvas);
+        
+        const gridCtx = gridCanvas.getContext('2d');
+        
+        function resizeCanvas() {
+            gridCanvas.width = window.innerWidth;
+            gridCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Draw grid
+        function drawGrid() {
+            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
             
-            init() {
-                this.initGrid();
-                this.initCursor();
-                this.initEventListeners();
-                this.animate();
-            },
+            const spacing = 50;
+            const centerX = gridCanvas.width / 2;
+            const centerY = gridCanvas.height / 2;
             
-            initGrid() {
-                const canvas = document.getElementById('gridCanvas');
-                const ctx = canvas.getContext('2d');
+            gridCtx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            gridCtx.lineWidth = 1;
+            
+            // Horizontal lines
+            for (let y = 0; y < gridCanvas.height; y += spacing) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, y);
+                gridCtx.lineTo(gridCanvas.width, y);
+                gridCtx.stroke();
+            }
+            
+            // Vertical lines
+            for (let x = 0; x < gridCanvas.width; x += spacing) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(x, 0);
+                gridCtx.lineTo(x, gridCanvas.height);
+                gridCtx.stroke();
+            }
+            
+            // Draw center point
+            gridCtx.fillStyle = 'rgba(0, 255, 136, 0.5)';
+            gridCtx.beginPath();
+            gridCtx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            gridCtx.fill();
+        }
+        
+        setInterval(drawGrid, 1000/60); // 60fps
+
+        // Cursor
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // API Configuration
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : '/api';
+
+        // DOM Elements
+        const domainInput = document.getElementById('domainInput');
+        const scanBtn = document.getElementById('scanBtn');
+        const statusEl = document.getElementById('status');
+        const statusMessageEl = document.getElementById('statusMessage');
+        const totalSubdomainsEl = document.getElementById('totalSubdomains');
+        const liveSubdomainsEl = document.getElementById('liveSubdomains');
+        const sensitiveFindingsEl = document.getElementById('sensitiveFindings');
+        const progressFill = document.getElementById('progress-fill');
+        const resultsDiv = document.getElementById('results');
+
+        // Scan function
+        async function startScan() {
+            const domain = domainInput.value.trim();
+            if (!domain) {
+                alert('Please enter a domain');
+                return;
+            }
+
+            // Disable button
+            scanBtn.disabled = true;
+            scanBtn.textContent = 'SCANNING...';
+            
+            // Reset UI
+            resultsDiv.innerHTML = '';
+            progressFill.style.width = '0%';
+            statusMessageEl.textContent = `INITIALIZING QUANTUM SCAN ON ${domain}`;
+            statusEl.textContent = 'SCANNING';
+
+            try {
+                // Determine API URL based on environment
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/quantum-recon'
+                    : '/api/quantum-recon';
                 
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                console.log('Sending request to:', apiUrl);
                 
-                this.grid = { canvas, ctx };
-                
-                window.addEventListener('resize', () => {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domain })
                 });
-            },
-            
-            initCursor() {
-                const cursor = document.querySelector('.cursor');
-                
-                document.addEventListener('mousemove', (e) => {
-                    cursor.style.left = e.clientX - 10 + 'px';
-                    cursor.style.top = e.clientY - 10 + 'px';
-                });
-            },
-            
-            initEventListeners() {
-                document.getElementById('scanBtn').addEventListener('click', () => this.startScan());
-                document.getElementById('domainInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.startScan();
-                });
-            },
-            
-            async startScan() {
-                const domain = document.getElementById('domainInput').value;
-                this.updateStatus(`INITIATING QUANTUM SCAN ON ${domain}`);
-                
-                try {
-                    const response = await fetch('/api/quantum-recon', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ domain })
-                    });
-                    
-                    const data = await response.json();
-                    this.processResults(data);
-                } catch (error) {
-                    this.updateStatus(`ERROR: ${error.message}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            },
-            
-            processResults(data) {
-                // Update quantum visualizer
-                this.quantum.visualizeQuantumState(data);
+
+                const data = await response.json();
+                console.log('Scan results:', data);
                 
-                // Update HUD metrics
-                document.getElementById('coherence').textContent = 
-                    (Math.random() * 20 + 80).toFixed(1) + '%';
-                document.getElementById('entanglement').textContent = 
-                    (Math.random() * 50 + 25).toFixed(1) + '%';
-                document.getElementById('superposition').textContent = 
-                    (Math.floor(Math.random() * 1000000)).toLocaleString();
+                // Update progress
+                progressFill.style.width = '100%';
+                
+                // Update stats
+                totalSubdomainsEl.textContent = data.stats?.totalSubdomains || 0;
+                liveSubdomainsEl.textContent = data.stats?.liveSubdomains || 0;
+                sensitiveFindingsEl.textContent = data.stats?.sensitiveFindings || 0;
                 
                 // Display results
-                const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = '';
+                displayResults(data);
                 
-                if (data.measurements) {
-                    data.measurements.slice(0, 20).forEach((m, i) => {
-                        const line = document.createElement('div');
-                        line.className = 'result-line';
-                        line.textContent = `[${new Date().toLocaleTimeString()}] ⟡ QUANTUM STATE ${i}: ${JSON.stringify(m).substring(0, 50)}...`;
-                        resultsDiv.appendChild(line);
-                    });
+                // Update 3D visualization
+                if (window.threeDVisualizer) {
+                    window.threeDVisualizer.createNeuralNetwork(data);
                 }
                 
-                this.updateStatus('SCAN COMPLETE - ANALYZING QUANTUM STATES');
-            },
-            
-            updateStatus(msg) {
-                document.getElementById('status').textContent = msg;
-            },
-            
-            animate() {
-                // Draw grid
-                this.drawGrid();
+                statusMessageEl.textContent = 'SCAN COMPLETE';
+                statusEl.textContent = 'READY';
                 
-                // Update progress bar (random for demo)
-                const progress = Math.random() * 100;
-                document.getElementById('progress-fill').style.width = progress + '%';
-                
-                requestAnimationFrame(() => this.animate());
-            },
-            
-            drawGrid() {
-                const { ctx, canvas } = this.grid;
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw perspective grid
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                const spacing = 50;
-                
-                ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
-                ctx.lineWidth = 1;
-                
-                // Horizontal lines
-                for (let y = 0; y < canvas.height; y += spacing) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(canvas.width, y);
-                    ctx.stroke();
-                }
-                
-                // Vertical lines with perspective
-                for (let x = 0; x < canvas.width; x += spacing) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, canvas.height);
-                    ctx.stroke();
-                }
-                
-                // Draw vanishing point
-                ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
-                ctx.fill();
+            } catch (error) {
+                console.error('Scan error:', error);
+                statusMessageEl.textContent = `ERROR: ${error.message}`;
+                statusEl.textContent = 'ERROR';
+                resultsDiv.innerHTML = `<div class="error-message">Scan failed: ${error.message}</div>`;
+            } finally {
+                // Re-enable button
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'SCAN';
             }
-        };
+        }
+
+        function displayResults(data) {
+            resultsDiv.innerHTML = '';
+            
+            if (!data.subdomains || data.subdomains.length === 0) {
+                resultsDiv.innerHTML = '<div class="result-line">No subdomains found</div>';
+                return;
+            }
+
+            // Sort: live first
+            const sorted = [...data.subdomains].sort((a, b) => (b.isLive ? 1 : 0) - (a.isLive ? 1 : 0));
+            
+            sorted.forEach(sub => {
+                const div = document.createElement('div');
+                div.className = `result-line ${sub.isLive ? 'live' : 'dead'}`;
+                
+                let techs = '';
+                if (sub.technologies && sub.technologies.length > 0) {
+                    techs = ` [${sub.technologies.map(t => t.name).join(', ')}]`;
+                }
+                
+                div.innerHTML = `
+                    <strong>${sub.subdomain}</strong>
+                    ${sub.isLive ? ` (${sub.statusCode || '?'})` : ' (inactive)'}
+                    <div class="subdomain-detail">
+                        ${sub.isLive ? `IP: ${sub.ips?.join(', ') || 'N/A'} | Server: ${sub.server || 'N/A'}${techs}` : ''}
+                    </div>
+                `;
+                
+                div.onclick = () => {
+                    if (sub.isLive) {
+                        window.open(`http://${sub.subdomain}`, '_blank');
+                    }
+                };
+                
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        // Event listeners
+        scanBtn.addEventListener('click', startScan);
+        domainInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                startScan();
+            }
+        });
+
+        // Initial status check
+        async function checkHealth() {
+            try {
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/health'
+                    : '/api/health';
+                
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    statusMessageEl.textContent = 'CONNECTED TO QUANTUM ENGINE';
+                }
+            } catch (error) {
+                console.log('Health check failed:', error);
+                statusMessageEl.textContent = 'RUNNING IN DEMO MODE';
+            }
+        }
         
-        // Start holodeck
-        holodeck.init();
+        checkHealth();
     </script>
 </body>
 </html>
