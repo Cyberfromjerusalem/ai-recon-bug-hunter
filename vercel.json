@@ -3,11 +3,7 @@
   "builds": [
     {
       "src": "api/quantum-recon.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "nodejs18.x"
-      }
+      "use": "@vercel/node"
     },
     {
       "src": "frontend/**",
@@ -17,19 +13,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/quantum-recon.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept"
-      }
+      "dest": "/api/quantum-recon.js"
     },
     {
       "src": "/(.*)",
       "dest": "/frontend/holodeck.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
