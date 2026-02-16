@@ -217,11 +217,12 @@
         }
 
         .result-line {
-            padding: 5px;
-            margin: 2px 0;
+            padding: 8px;
+            margin: 4px 0;
             border-bottom: 1px solid rgba(0, 255, 136, 0.1);
             animation: fadeIn 0.5s;
             cursor: pointer;
+            border-left: 3px solid transparent;
         }
 
         .result-line:hover {
@@ -229,11 +230,11 @@
         }
 
         .result-line.live {
-            border-left: 3px solid var(--success);
+            border-left-color: var(--success);
         }
 
         .result-line.dead {
-            border-left: 3px solid var(--error);
+            border-left-color: var(--error);
         }
 
         @keyframes fadeIn {
@@ -245,6 +246,7 @@
             font-size: 10px;
             color: var(--secondary);
             margin-left: 10px;
+            margin-top: 4px;
         }
 
         .cursor {
@@ -389,10 +391,19 @@
             cursor.style.top = e.clientY + 'px';
         });
 
-        // API Configuration
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api'
-            : '/api';
+        // ================ FIXED API URL SECTION ================
+        // This automatically detects if we're on localhost or production
+        const API_BASE_URL = (function() {
+            // Check if we're on localhost
+            if (window.location.hostname === 'localhost' || 
+                window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:3000/api';
+            }
+            // On Render/Vercel, use relative paths
+            return '/api';
+        })();
+
+        console.log('API Base URL:', API_BASE_URL); // For debugging
 
         // DOM Elements
         const domainInput = document.getElementById('domainInput');
@@ -413,25 +424,26 @@
                 return;
             }
 
-            // Disable button
+            // Disable button and update UI
             scanBtn.disabled = true;
             scanBtn.textContent = 'SCANNING...';
-            
-            // Reset UI
             resultsDiv.innerHTML = '';
             progressFill.style.width = '0%';
             statusMessageEl.textContent = `INITIALIZING QUANTUM SCAN ON ${domain}`;
             statusEl.textContent = 'SCANNING';
 
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                if (progress <= 90) {
+                    progressFill.style.width = progress + '%';
+                }
+            }, 200);
+
             try {
-                // Determine API URL based on environment
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/quantum-recon'
-                    : '/api/quantum-recon';
-                
-                console.log('Sending request to:', apiUrl);
-                
-                const response = await fetch(apiUrl, {
+                // ================ FIXED API CALL ================
+                const response = await fetch(`${API_BASE_URL}/quantum-recon`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -439,14 +451,17 @@
                     body: JSON.stringify({ domain })
                 });
 
+                clearInterval(progressInterval);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
                 console.log('Scan results:', data);
                 
-                // Update progress
+                // Update progress to complete
                 progressFill.style.width = '100%';
                 
                 // Update stats
@@ -457,7 +472,7 @@
                 // Display results
                 displayResults(data);
                 
-                // Update 3D visualization
+                // Update 3D visualization if available
                 if (window.threeDVisualizer) {
                     window.threeDVisualizer.createNeuralNetwork(data);
                 }
@@ -466,9 +481,11 @@
                 statusEl.textContent = 'READY';
                 
             } catch (error) {
+                clearInterval(progressInterval);
                 console.error('Scan error:', error);
                 statusMessageEl.textContent = `ERROR: ${error.message}`;
                 statusEl.textContent = 'ERROR';
+                progressFill.style.width = '0%';
                 resultsDiv.innerHTML = `<div class="error-message">Scan failed: ${error.message}</div>`;
             } finally {
                 // Re-enable button
@@ -501,7 +518,7 @@
                     <strong>${sub.subdomain}</strong>
                     ${sub.isLive ? ` (${sub.statusCode || '?'})` : ' (inactive)'}
                     <div class="subdomain-detail">
-                        ${sub.isLive ? `IP: ${sub.ips?.join(', ') || 'N/A'} | Server: ${sub.server || 'N/A'}${techs}` : ''}
+                        ${sub.isLive ? `IP: ${sub.ips?.join(', ') || 'N/A'} | Server: ${sub.server || 'N/A'}${techs} | Response: ${sub.responseTime || '?'}ms` : ''}
                     </div>
                 `;
                 
@@ -523,24 +540,24 @@
             }
         });
 
-        // Initial status check
+        // Check API health on load
         async function checkHealth() {
             try {
-                const apiUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000/api/health'
-                    : '/api/health';
-                
-                const response = await fetch(apiUrl);
+                const response = await fetch(`${API_BASE_URL}/health`);
                 if (response.ok) {
                     statusMessageEl.textContent = 'CONNECTED TO QUANTUM ENGINE';
+                    console.log('API health check passed');
+                } else {
+                    console.log('API health check failed:', response.status);
                 }
             } catch (error) {
-                console.log('Health check failed:', error);
-                statusMessageEl.textContent = 'RUNNING IN DEMO MODE';
+                console.log('Health check failed (this is normal if server is starting):', error.message);
+                statusMessageEl.textContent = 'WAITING FOR API CONNECTION...';
             }
         }
         
-        checkHealth();
+        // Check health after a short delay
+        setTimeout(checkHealth, 1000);
     </script>
 </body>
 </html>
