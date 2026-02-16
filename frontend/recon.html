@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REAL Subdomain Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 1px solid #00ff88;
+            padding-bottom: 10px;
+        }
+
+        h1 span {
+            color: #ff3366;
+            font-size: 14px;
+        }
+
+        .scan-box {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            background: #0a0a0f;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 3px;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        button {
+            background: #00ff88;
+            border: none;
+            color: #0a0a0f;
+            padding: 12px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00cc66;
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            padding: 15px;
+            text-align: center;
+            border-radius: 3px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .progress {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            height: 30px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #00ff88;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0a0f;
+            font-weight: bold;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .subdomain-list {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .subdomain-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 2fr 100px;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+            align-items: center;
+        }
+
+        .subdomain-item:hover {
+            background: #2a2a3a;
+        }
+
+        .subdomain-item.header {
+            background: #0a0a0f;
+            color: #00ff88;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .live-badge {
+            background: #00ff88;
+            color: #0a0a0f;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dead-badge {
+            background: #ff3366;
+            color: #0a0a0f;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .ip-list {
+            color: #888;
+            font-size: 11px;
+        }
+
+        .status-code {
+            font-weight: bold;
+        }
+        .status-code[data-code="200"] { color: #00ff88; }
+        .status-code[data-code="301"] { color: #ffaa33; }
+        .status-code[data-code="302"] { color: #ffaa33; }
+        .status-code[data-code="403"] { color: #ff3366; }
+        .status-code[data-code="404"] { color: #ff3366; }
+        .status-code[data-code="500"] { color: #ff3366; }
+
+        .log-panel {
+            margin-top: 20px;
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            padding: 10px;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            color: #888;
+            padding: 2px 0;
+            border-bottom: 1px dotted #333;
+        }
+
+        .log-time {
+            color: #00ff88;
+            margin-right: 10px;
+        }
+
+        .log-success { color: #00ff88; }
+        .log-error { color: #ff3366; }
+
+        .info-text {
+            color: #888;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .no-results {
+            padding: 40px;
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 REAL Subdomain Scanner <span>v1.0 - No Fake Data</span></h1>
+        
+        <div class="scan-box">
+            <div class="input-group">
+                <input type="text" id="domainInput" placeholder="Enter domain (e.g., example.com)" value="google.com">
+                <button id="scanBtn">START SCAN</button>
+            </div>
+            <div class="info-text">
+                ⚡ Scanning common subdomains using real DNS lookups • No fake data • HTTP/HTTPS verification
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">TOTAL FOUND</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statLive">0</div>
+                <div class="stat-label">LIVE (HTTP/HTTPS)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statDead">0</div>
+                <div class="stat-label">DNS ONLY</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statHttps">0</div>
+                <div class="stat-label">HTTPS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statHttp">0</div>
+                <div class="stat-label">HTTP</div>
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="results-header">
+            <span>📍 Showing real results from DNS lookup</span>
+            <span id="scanTime"></span>
+        </div>
+
+        <div class="subdomain-list" id="subdomainList">
+            <div class="subdomain-item header">
+                <div>Subdomain</div>
+                <div>Status</div>
+                <div>IP Address</div>
+                <div>HTTP/HTTPS</div>
+                <div>Response Time</div>
+            </div>
+            <div class="no-results">Enter a domain and click START SCAN</div>
+        </div>
+
+        <div class="log-panel" id="logPanel">
+            <div class="log-entry"><span class="log-time">⟡</span> Ready to scan. Enter a domain above.</div>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api';
+
+        // DOM elements
+        const domainInput = document.getElementById('domainInput');
+        const scanBtn = document.getElementById('scanBtn');
+        const progressBar = document.getElementById('progressBar');
+        const subdomainList = document.getElementById('subdomainList');
+        const logPanel = document.getElementById('logPanel');
+        
+        // Stats elements
+        const statTotal = document.getElementById('statTotal');
+        const statLive = document.getElementById('statLive');
+        const statDead = document.getElementById('statDead');
+        const statHttps = document.getElementById('statHttps');
+        const statHttp = document.getElementById('statHttp');
+        const scanTimeEl = document.getElementById('scanTime');
+
+        // Logging function
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString();
+            const logClass = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : '');
+            
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${logClass}">${message}</span>`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+            
+            // Keep only last 50 logs
+            while (logPanel.children.length > 50) {
+                logPanel.removeChild(logPanel.children[0]);
+            }
+        }
+
+        // Update stats
+        function updateStats(data) {
+            statTotal.textContent = data.stats.total || 0;
+            statLive.textContent = data.stats.live || 0;
+            statDead.textContent = data.stats.dead || 0;
+            statHttps.textContent = data.stats.withHttps || 0;
+            statHttp.textContent = data.stats.withHttp || 0;
+            scanTimeEl.textContent = `⏱️ ${(data.scanTime / 1000).toFixed(2)}s`;
+        }
+
+        // Display subdomains
+        function displaySubdomains(data) {
+            if (!data.subdomains || data.subdomains.length === 0) {
+                subdomainList.innerHTML = `
+                    <div class="subdomain-item header">
+                        <div>Subdomain</div>
+                        <div>Status</div>
+                        <div>IP Address</div>
+                        <div>HTTP/HTTPS</div>
+                        <div>Response Time</div>
+                    </div>
+                    <div class="no-results">No subdomains found for ${data.domain}</div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="subdomain-item header">
+                    <div>Subdomain</div>
+                    <div>Status</div>
+                    <div>IP Address</div>
+                    <div>HTTP/HTTPS</div>
+                    <div>Response Time</div>
+                </div>
+            `;
+
+            data.subdomains.forEach(sub => {
+                const httpStatus = sub.http ? sub.http.statusCode : null;
+                const httpsStatus = sub.https ? sub.https.statusCode : null;
+                
+                let statusHtml = '';
+                if (httpsStatus) {
+                    statusHtml += `<span class="status-code" data-code="${httpsStatus}">HTTPS ${httpsStatus}</span>`;
+                }
+                if (httpStatus) {
+                    if (httpsStatus) statusHtml += ' / ';
+                    statusHtml += `<span class="status-code" data-code="${httpStatus}">HTTP ${httpStatus}</span>`;
+                }
+                if (!httpStatus && !httpsStatus) {
+                    statusHtml = '<span style="color:#888;">No web server</span>';
+                }
+
+                html += `
+                    <div class="subdomain-item">
+                        <div><strong>${sub.subdomain}</strong></div>
+                        <div>
+                            <span class="${sub.isLive ? 'live-badge' : 'dead-badge'}">
+                                ${sub.isLive ? 'LIVE' : 'DNS ONLY'}
+                            </span>
+                        </div>
+                        <div class="ip-list">${sub.ips ? sub.ips.join('<br>') : 'N/A'}</div>
+                        <div>${statusHtml}</div>
+                        <div>
+                            ${sub.https ? sub.https.responseTime + 'ms' : ''}
+                            ${sub.http ? '<br>' + sub.http.responseTime + 'ms' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            subdomainList.innerHTML = html;
+        }
+
+        // Scan function
+        async function startScan() {
+            const domain = domainInput.value.trim();
+            if (!domain) {
+                addLog('❌ Please enter a domain', 'error');
+                return;
+            }
+
+            // Disable button
+            scanBtn.disabled = true;
+            scanBtn.textContent = 'SCANNING...';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            
+            // Clear previous results
+            subdomainList.innerHTML = `
+                <div class="subdomain-item header">
+                    <div>Subdomain</div>
+                    <div>Status</div>
+                    <div>IP Address</div>
+                    <div>HTTP/HTTPS</div>
+                    <div>Response Time</div>
+                </div>
+                <div class="no-results">Scanning ${domain}...</div>
+            `;
+            
+            // Reset stats
+            statTotal.textContent = '0';
+            statLive.textContent = '0';
+            statDead.textContent = '0';
+            statHttps.textContent = '0';
+            statHttp.textContent = '0';
+            
+            addLog(`🚀 Starting scan of ${domain}`, 'info');
+
+            try {
+                const response = await fetch(`${API_BASE}/quantum-recon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Scan failed');
+                }
+
+                const data = await response.json();
+                
+                // Update UI
+                updateStats(data);
+                displaySubdomains(data);
+                
+                addLog(`✅ Scan complete! Found ${data.stats.total} subdomains (${data.stats.live} live)`, 'success');
+                
+                // Log some found subdomains
+                data.subdomains.slice(0, 5).forEach(sub => {
+                    if (sub.isLive) {
+                        addLog(`  → ${sub.subdomain} (${sub.ips[0]})`, 'success');
+                    }
+                });
+
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                console.error('Scan error:', error);
+                
+                subdomainList.innerHTML = `
+                    <div class="subdomain-item header">
+                        <div>Subdomain</div>
+                        <div>Status</div>
+                        <div>IP Address</div>
+                        <div>HTTP/HTTPS</div>
+                        <div>Response Time</div>
+                    </div>
+                    <div class="no-results">Error: ${error.message}</div>
+                `;
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'START SCAN';
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+            }
+        }
+
+        // Simulate progress (since we can't get real progress from API)
+        function simulateProgress() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 2;
+                if (progress <= 90) {
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress + '%';
+                }
+                if (progress >= 90 || scanBtn.disabled === false) {
+                    clearInterval(interval);
+                }
+            }, 100);
+        }
+
+        // Event listeners
+        scanBtn.addEventListener('click', () => {
+            simulateProgress();
+            startScan();
+        });
+
+        domainInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                simulateProgress();
+                startScan();
+            }
+        });
+
+        // Test with google.com on load
+        setTimeout(() => {
+            addLog('💡 Try scanning google.com, github.com, or your own domain', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>
