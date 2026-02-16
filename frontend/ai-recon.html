@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Recon - Hidden Data Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ff88;
+            padding-bottom: 10px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .title span {
+            color: #ff3366;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .status {
+            color: #888;
+            font-size: 12px;
+        }
+
+        /* Scan Box */
+        .scan-box {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: #0a0a0f;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 3px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .input-group button {
+            background: #00ff88;
+            border: none;
+            color: #0a0a0f;
+            padding: 15px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .input-group button:hover {
+            background: #00cc66;
+            box-shadow: 0 0 30px #00ff88;
+        }
+
+        .input-group button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .scan-info {
+            display: flex;
+            gap: 20px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .stat-card.critical {
+            border-color: #ff3366;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .stat-desc {
+            color: #ff3366;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* Progress */
+        .progress-section {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 30px;
+            background: #0a0a0f;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #00ff88;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0a0f;
+            font-weight: bold;
+        }
+
+        .phase-indicator {
+            color: #00ff88;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* Main Content */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Subdomains List */
+        .subdomains-section {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .subdomain-item {
+            border-bottom: 1px solid #333;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subdomain-item:hover {
+            background: #2a2a3a;
+        }
+
+        .subdomain-item.live {
+            border-left: 3px solid #00ff88;
+        }
+
+        .subdomain-item.dead {
+            border-left: 3px solid #ff3366;
+            opacity: 0.6;
+        }
+
+        .subdomain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .subdomain-name {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .subdomain-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .status-live {
+            background: #00ff88;
+            color: #0a0a0f;
+        }
+
+        .status-dead {
+            background: #ff3366;
+            color: #0a0a0f;
+        }
+
+        .subdomain-details {
+            font-size: 11px;
+            color: #888;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .ip-list {
+            color: #00ff88;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 5px;
+        }
+
+        .tech-tag {
+            background: #0a0a0f;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 2px 5px;
+            font-size: 9px;
+            border-radius: 2px;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Sensitive Data Panel */
+        .sensitive-panel {
+            background: #1a1a2a;
+            border: 2px solid #ff3366;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .sensitive-header {
+            color: #ff3366;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sensitive-item {
+            background: #2a1a1a;
+            border: 1px solid #ff3366;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+
+        .sensitive-url {
+            color: #ff3366;
+            font-size: 11px;
+            word-break: break-all;
+        }
+
+        .sensitive-type {
+            display: inline-block;
+            background: #ff3366;
+            color: #0a0a0f;
+            padding: 2px 5px;
+            font-size: 9px;
+            border-radius: 2px;
+            margin: 5px 0;
+        }
+
+        .sensitive-match {
+            background: #0a0a0f;
+            padding: 5px;
+            font-size: 10px;
+            color: #ff8888;
+            overflow-x: auto;
+        }
+
+        /* Technologies Panel */
+        .tech-panel {
+            background: #1a1a2a;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .tech-header {
+            color: #00ff88;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tech-badge {
+            background: #0a0a0f;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        .tech-badge span {
+            color: #888;
+            font-size: 9px;
+            margin-left: 5px;
+        }
+
+        /* Warnings Panel */
+        .warnings-panel {
+            background: #1a1a1a;
+            border: 1px solid #ffaa33;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .warning-item {
+            color: #ffaa33;
+            font-size: 12px;
+            padding: 5px 0;
+            border-bottom: 1px dotted #ffaa33;
+        }
+
+        /* Log Panel */
+        .log-panel {
+            background: #1a1a2a;
+            border: 1px solid #888;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 11px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            color: #888;
+            padding: 2px 0;
+            border-bottom: 1px dotted #333;
+        }
+
+        .log-time {
+            color: #00ff88;
+            margin-right: 10px;
+        }
+
+        .log-success { color: #00ff88; }
+        .log-error { color: #ff3366; }
+        .log-warning { color: #ffaa33; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="title">
+                🤖 AI RECON - HIDDEN DATA DETECTOR
+                <span>v2.0 - REAL FINDINGS</span>
+            </div>
+            <div class="status" id="status">System Ready</div>
+        </div>
+
+        <!-- Scan Box -->
+        <div class="scan-box">
+            <div class="input-group">
+                <input type="text" id="domainInput" placeholder="Enter target domain (e.g., example.com)" value="google.com">
+                <button id="scanBtn">START AI SCAN</button>
+            </div>
+            <div class="scan-info">
+                <span>🔍 AI-powered subdomain discovery</span>
+                <span>🛡️ Sensitive data pattern matching</span>
+                <span>📊 Technology fingerprinting</span>
+                <span>⚠️ Security vulnerability detection</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Subdomains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statLive">0</div>
+                <div class="stat-label">Live Endpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statDNS">0</div>
+                <div class="stat-label">DNS Only</div>
+            </div>
+            <div class="stat-card critical">
+                <div class="stat-value" id="statSensitive">0</div>
+                <div class="stat-label">Sensitive Findings</div>
+                <div class="stat-desc" id="sensitiveDesc"></div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section">
+            <div class="phase-indicator" id="currentPhase">⚡ Initializing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            <div style="color: #888; font-size: 11px;" id="progressDetail"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Left: Subdomains -->
+            <div class="subdomains-section">
+                <div class="section-header">
+                    <span>📍 DISCOVERED SUBDOMAINS</span>
+                    <span id="subdomainCount">0</span>
+                </div>
+                <div id="subdomainList"></div>
+            </div>
+
+            <!-- Right: Panels -->
+            <div class="right-panel">
+                <!-- Sensitive Data -->
+                <div class="sensitive-panel">
+                    <div class="sensitive-header">
+                        ⚠️ CRITICAL FINDINGS
+                        <span id="sensitiveCount" style="color: #ff3366;">0</span>
+                    </div>
+                    <div id="sensitiveList"></div>
+                </div>
+
+                <!-- Technologies -->
+                <div class="tech-panel">
+                    <div class="tech-header">
+                        🔧 DETECTED TECHNOLOGIES
+                        <span id="techCount" style="color: #888;">0</span>
+                    </div>
+                    <div class="tech-grid" id="techList"></div>
+                </div>
+
+                <!-- Warnings -->
+                <div class="warnings-panel" id="warningsList"></div>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-panel" id="logPanel"></div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api';
+
+        // DOM Elements
+        const domainInput = document.getElementById('domainInput');
+        const scanBtn = document.getElementById('scanBtn');
+        const statusEl = document.getElementById('status');
+        const currentPhase = document.getElementById('currentPhase');
+        const progressBar = document.getElementById('progressBar');
+        const progressDetail = document.getElementById('progressDetail');
+        
+        // Stats
+        const statTotal = document.getElementById('statTotal');
+        const statLive = document.getElementById('statLive');
+        const statDNS = document.getElementById('statDNS');
+        const statSensitive = document.getElementById('statSensitive');
+        const sensitiveDesc = document.getElementById('sensitiveDesc');
+        
+        // Lists
+        const subdomainList = document.getElementById('subdomainList');
+        const sensitiveList = document.getElementById('sensitiveList');
+        const techList = document.getElementById('techList');
+        const warningsList = document.getElementById('warningsList');
+        const logPanel = document.getElementById('logPanel');
+        
+        // Counters
+        const subdomainCount = document.getElementById('subdomainCount');
+        const sensitiveCount = document.getElementById('sensitiveCount');
+        const techCount = document.getElementById('techCount');
+
+        // Logging
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString();
+            const logClass = type === 'success' ? 'log-success' : 
+                            type === 'error' ? 'log-error' : 
+                            type === 'warning' ? 'log-warning' : '';
+            
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${logClass}">${message}</span>`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+            
+            while (logPanel.children.length > 100) {
+                logPanel.removeChild(logPanel.children[0]);
+            }
+        }
+
+        // Update UI with scan results
+        function updateResults(data) {
+            // Stats
+            const liveCount = data.subdomains.filter(s => s.isLive).length;
+            const dnsCount = data.subdomains.filter(s => !s.isLive).length;
+            
+            statTotal.textContent = data.stats.totalSubdomains;
+            statLive.textContent = liveCount;
+            statDNS.textContent = dnsCount;
+            statSensitive.textContent = data.stats.sensitiveFindings;
+            
+            subdomainCount.textContent = data.stats.totalSubdomains;
+            sensitiveCount.textContent = data.stats.sensitiveFindings;
+            techCount.textContent = data.summary.technologies.length;
+
+            // Subdomains
+            let subHtml = '';
+            data.subdomains.forEach(sub => {
+                const statusClass = sub.isLive ? 'live' : 'dead';
+                const statusText = sub.isLive ? 'LIVE' : 'DNS ONLY';
+                const statusBadge = sub.isLive ? 'status-live' : 'status-dead';
+                
+                const ips = sub.ips ? sub.ips.join(', ') : 'N/A';
+                const httpInfo = sub.https ? `HTTPS ${sub.https.statusCode}` : 
+                                sub.http ? `HTTP ${sub.http.statusCode}` : 'No web server';
+                
+                let techHtml = '';
+                if (sub.technologies && sub.technologies.length > 0) {
+                    techHtml = '<div class="tech-tags">' + 
+                        sub.technologies.map(t => `<span class="tech-tag">${t.name}</span>`).join('') + 
+                        '</div>';
+                }
+
+                subHtml += `
+                    <div class="subdomain-item ${statusClass}" onclick="window.open('http${sub.https ? 's' : ''}://${sub.subdomain}', '_blank')">
+                        <div class="subdomain-header">
+                            <span class="subdomain-name">${sub.subdomain}</span>
+                            <span class="subdomain-status ${statusBadge}">${statusText}</span>
+                        </div>
+                        <div class="subdomain-details">
+                            <div><span style="color:#888;">IP:</span> <span class="ip-list">${ips}</span></div>
+                            <div><span style="color:#888;">HTTP:</span> ${httpInfo}</div>
+                            <div><span style="color:#888;">Time:</span> ${sub.https?.responseTime || sub.http?.responseTime || '-'}ms</div>
+                        </div>
+                        ${techHtml}
+                    </div>
+                `;
+            });
+            subdomainList.innerHTML = subHtml || '<div style="padding:20px; text-align:center; color:#888;">No subdomains found</div>';
+
+            // Sensitive Data
+            let sensitiveHtml = '';
+            data.summary.sensitiveData.forEach(s => {
+                sensitiveHtml += `
+                    <div class="sensitive-item">
+                        <div class="sensitive-url">${s.url}</div>
+                        <span class="sensitive-type">${s.hasSensitiveData ? 'CONTAINS SENSITIVE DATA' : 'EXPOSED PATH'}</span>
+                        <div style="font-size:10px; margin-top:5px;">Status: ${s.statusCode}</div>
+                    </div>
+                `;
+            });
+            sensitiveList.innerHTML = sensitiveHtml || '<div style="color:#888; padding:10px;">No sensitive data found</div>';
+
+            // Technologies
+            let techHtml = '';
+            data.summary.technologies.forEach(t => {
+                techHtml += `<div class="tech-badge">${t.name} <span>${t.category}</span></div>`;
+            });
+            techList.innerHTML = techHtml || '<div style="color:#888;">No technologies detected</div>';
+
+            // Warnings
+            let warningHtml = '';
+            data.summary.warnings.forEach(w => {
+                warningHtml += `<div class="warning-item">⚠️ ${w}</div>`;
+            });
+            warningsList.innerHTML = warningHtml || '<div style="color:#888; padding:10px;">No warnings</div>';
+
+            // Update sensitive description
+            if (data.stats.sensitiveFindings > 0) {
+                sensitiveDesc.textContent = 'CRITICAL - Review immediately!';
+            }
+        }
+
+        // Scan function
+        async function startScan() {
+            const domain = domainInput.value.trim();
+            if (!domain) {
+                addLog('Please enter a domain', 'error');
+                return;
+            }
+
+            // Disable UI
+            scanBtn.disabled = true;
+            scanBtn.textContent = 'SCANNING...';
+            statusEl.textContent = 'SCANNING';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            
+            // Clear previous results
+            subdomainList.innerHTML = '<div style="padding:20px; text-align:center;">Scanning...</div>';
+            sensitiveList.innerHTML = '';
+            techList.innerHTML = '';
+            warningsList.innerHTML = '';
+            
+            addLog(`🚀 Starting AI reconnaissance on ${domain}`, 'success');
+
+            // Simulate progress phases
+            const phases = [
+                'Phase 1: AI-Powered Subdomain Discovery',
+                'Phase 2: Validating Subdomains',
+                'Phase 3: Scanning for Sensitive Data',
+                'Phase 4: Detecting Technologies',
+                'Phase 5: Generating Insights'
+            ];
+
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                if (progress <= 90) {
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress + '%';
+                    
+                    const phaseIndex = Math.floor(progress / 18);
+                    if (phaseIndex < phases.length) {
+                        currentPhase.textContent = '⚡ ' + phases[phaseIndex];
+                    }
+                    progressDetail.textContent = `Scanning... ${Math.floor(progress)}% complete`;
+                }
+            }, 300);
+
+            try {
+                const response = await fetch(`${API_BASE}/scan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain })
+                });
+
+                clearInterval(progressInterval);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Scan failed');
+                }
+
+                const data = await response.json();
+                
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                currentPhase.textContent = '✅ Scan Complete!';
+                progressDetail.textContent = `Found ${data.stats.totalSubdomains} subdomains in ${data.subdomains.length} checks`;
+                
+                updateResults(data);
+                addLog(`✅ Scan complete! Found ${data.stats.totalSubdomains} subdomains, ${data.stats.sensitiveFindings} sensitive findings`, 'success');
+                
+                if (data.stats.sensitiveFindings > 0) {
+                    addLog(`⚠️ CRITICAL: ${data.stats.sensitiveFindings} sensitive data exposures found!`, 'warning');
+                }
+
+            } catch (error) {
+                clearInterval(progressInterval);
+                addLog(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+                
+                progressBar.style.width = '0%';
+                progressBar.textContent = 'ERROR';
+                currentPhase.textContent = '❌ Scan Failed';
+                
+                subdomainList.innerHTML = `<div style="padding:20px; text-align:center; color:#ff3366;">Error: ${error.message}</div>`;
+                
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'START AI SCAN';
+                statusEl.textContent = 'Ready';
+            }
+        }
+
+        // Event listeners
+        scanBtn.addEventListener('click', startScan);
+        domainInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') startScan();
+        });
+
+        addLog('System ready. Enter a domain to begin AI reconnaissance.', 'info');
+    </script>
+</body>
+</html>
