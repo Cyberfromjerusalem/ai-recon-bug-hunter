@@ -1,18 +1,23 @@
-services:
-  - type: web
-    name: ai-recon-bug-hunter
-    runtime: node
-    repo: https://github.com/YOUR_USERNAME/ai-recon-bug-hunter
-    plan: free
-    region: oregon
-    buildCommand: npm install
-    startCommand: node api/quantum-recon.js
-    envVars:
-      - key: NODE_VERSION
-        value: 18.18.0
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10000
-    healthCheckPath: /api/health
-    autoDeploy: true
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/quantum-recon.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/quantum-recon.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/holodeck.html"
+    }
+  ]
+}
