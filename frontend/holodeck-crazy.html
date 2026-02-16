@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ QUANTUM RECON MATRIX ⚡</title>
+    <style>
+        /* GLOBAL STYLES - PURE CHAOS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* MAIN CONTAINER - WINDOWS 95 MEETS MATRIX */
+        #recon-matrix {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0a0a0a, #000);
+            overflow: hidden;
+        }
+
+        /* FLOATING WINDOWS - EVERYWHERE! */
+        .window {
+            position: absolute;
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #0f0;
+            box-shadow: 0 0 30px #0f0,
+                        inset 0 0 10px rgba(0, 255, 0, 0.3);
+            backdrop-filter: blur(5px);
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            resize: both;
+            overflow: auto;
+            min-width: 200px;
+            min-height: 150px;
+            z-index: 1000;
+            animation: windowAppear 0.3s ease-out;
+            cursor: move;
+        }
+
+        @keyframes windowAppear {
+            0% { transform: scale(0) rotate(180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .window-header {
+            background: linear-gradient(90deg, #0f0, #0a0);
+            color: #000;
+            padding: 5px;
+            font-weight: bold;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #0f0;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .window-title {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .window-title i {
+            animation: blink 1s infinite;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .window-btn {
+            background: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .window-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+
+        .window-content {
+            padding: 10px;
+            height: calc(100% - 30px);
+            overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #0f0 #000;
+        }
+
+        .window-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .window-content::-webkit-scrollbar-track {
+            background: #000;
+        }
+        .window-content::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+
+        /* INPUT WINDOW - MAIN CONTROL */
+        #input-window {
+            top: 50px;
+            left: 50px;
+            width: 400px;
+            z-index: 2000;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .crazy-input {
+            flex: 1;
+            background: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .crazy-input:focus {
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .crazy-btn {
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .crazy-btn:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 30px #0f0;
+            transform: scale(1.05);
+        }
+
+        .crazy-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* STATUS BAR */
+        .status-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 5px;
+            background: #000;
+            border: 1px solid #0f0;
+        }
+
+        .status-item {
+            flex: 1;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* SUBDOMAIN WINDOW */
+        .subdomain-item {
+            padding: 5px;
+            border-bottom: 1px solid #0f0;
+            cursor: pointer;
+            animation: slideIn 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .subdomain-item:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        .subdomain-item.live {
+            border-left: 5px solid #0f0;
+        }
+
+        .subdomain-item.dead {
+            border-left: 5px solid #f00;
+            opacity: 0.5;
+        }
+
+        .subdomain-name {
+            font-weight: bold;
+        }
+
+        .subdomain-status {
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .live .subdomain-status {
+            background: #0f0;
+            color: #000;
+        }
+
+        .dead .subdomain-status {
+            background: #f00;
+            color: #000;
+        }
+
+        /* VISUALIZATION CANVAS */
+        #viz-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* MATRIX RAIN CANVAS */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* METRICS WINDOW */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .metric-card {
+            background: #000;
+            border: 1px solid #0f0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        /* CHART WINDOW */
+        .chart-container {
+            width: 100%;
+            height: 200px;
+            position: relative;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            height: 150px;
+            margin-top: 20px;
+        }
+
+        .bar {
+            flex: 1;
+            background: #0f0;
+            transition: height 0.3s;
+            position: relative;
+            min-width: 20px;
+        }
+
+        .bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0f0;
+            font-size: 10px;
+        }
+
+        /* LOG WINDOW */
+        .log-entry {
+            font-size: 11px;
+            padding: 2px 0;
+            border-bottom: 1px dashed rgba(0, 255, 0, 0.2);
+            animation: logFade 0.5s;
+        }
+
+        @keyframes logFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-time {
+            color: #0f0;
+            opacity: 0.7;
+        }
+
+        .log-level-info { color: #0f0; }
+        .log-level-warn { color: #ff0; }
+        .log-level-error { color: #f00; }
+
+        /* PORT SCANNER WINDOW */
+        .port-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+
+        .port-item {
+            background: #000;
+            border: 1px solid #0f0;
+            padding: 5px;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .port-item.open {
+            background: #0f0;
+            color: #000;
+        }
+
+        /* TECHNOLOGY STACK */
+        .tech-tag {
+            display: inline-block;
+            background: #000;
+            border: 1px solid #0f0;
+            padding: 2px 5px;
+            margin: 2px;
+            font-size: 10px;
+            border-radius: 3px;
+        }
+
+        /* HEADERS WINDOW */
+        .header-item {
+            font-size: 10px;
+            padding: 2px;
+            border-bottom: 1px dotted rgba(0, 255, 0, 0.2);
+        }
+
+        /* CRAZY ANIMATIONS */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .glitch:hover {
+            animation: glitch 0.3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .flicker {
+            animation: flicker 0.5s infinite;
+        }
+
+        /* CONTEXT MENU */
+        .context-menu {
+            position: absolute;
+            background: #000;
+            border: 1px solid #0f0;
+            padding: 5px 0;
+            display: none;
+            z-index: 10000;
+        }
+
+        .context-menu-item {
+            padding: 5px 20px;
+            cursor: pointer;
+        }
+
+        .context-menu-item:hover {
+            background: #0f0;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="recon-matrix">
+        <!-- Background canvases -->
+        <canvas id="matrix-canvas"></canvas>
+        <canvas id="viz-canvas"></canvas>
+
+        <!-- Windows will be dynamically created here -->
+    </div>
+
+    <script>
+        // ==================== MATRIX RAIN BACKGROUND ====================
+        const matrixCanvas = document.getElementById('matrix-canvas');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        
+        const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const fontSize = 14;
+        const columns = matrixCanvas.width / fontSize;
+        const drops = [];
+        
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        
+        function drawMatrix() {
+            matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            
+            matrixCtx.fillStyle = '#0f0';
+            matrixCtx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+
+        // ==================== WINDOW MANAGEMENT ====================
+        let windows = [];
+        let windowZIndex = 1000;
+        let draggedWindow = null;
+        let dragOffsetX, dragOffsetY;
+
+        function createWindow(title, x, y, width, height, content, options = {}) {
+            const id = 'window-' + Date.now() + '-' + Math.random();
+            const windowDiv = document.createElement('div');
+            windowDiv.className = 'window';
+            windowDiv.id = id;
+            windowDiv.style.left = x + 'px';
+            windowDiv.style.top = y + 'px';
+            windowDiv.style.width = width + 'px';
+            windowDiv.style.height = height + 'px';
+            windowDiv.style.zIndex = windowZIndex++;
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'window-header';
+            header.innerHTML = `
+                <div class="window-title">
+                    <i>⚡</i>
+                    <span>${title}</span>
+                </div>
+                <div class="window-controls">
+                    <div class="window-btn minimize-btn">−</div>
+                    <div class="window-btn close-btn">×</div>
+                </div>
+            `;
+
+            // Content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'window-content';
+            contentDiv.innerHTML = content;
+
+            windowDiv.appendChild(header);
+            windowDiv.appendChild(contentDiv);
+
+            // Make draggable
+            header.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('window-btn')) return;
+                draggedWindow = windowDiv;
+                dragOffsetX = e.clientX - windowDiv.offsetLeft;
+                dragOffsetY = e.clientY - windowDiv.offsetTop;
+                windowDiv.style.zIndex = windowZIndex++;
+            });
+
+            // Minimize
+            header.querySelector('.minimize-btn').addEventListener('click', () => {
+                contentDiv.style.display = contentDiv.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close
+            header.querySelector('.close-btn').addEventListener('click', () => {
+                windowDiv.remove();
+                windows = windows.filter(w => w.id !== id);
+            });
+
+            document.getElementById('recon-matrix').appendChild(windowDiv);
+            windows.push({ id, div: windowDiv, options });
+
+            return windowDiv;
+        }
+
+        // Mouse move for dragging
+        document.addEventListener('mousemove', (e) => {
+            if (draggedWindow) {
+                draggedWindow.style.left = (e.clientX - dragOffsetX) + 'px';
+                draggedWindow.style.top = (e.clientY - dragOffsetY) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            draggedWindow = null;
+        });
+
+        // ==================== DATA STORAGE ====================
+        let scanData = {
+            domain: '',
+            subdomains: [],
+            ports: [],
+            technologies: [],
+            headers: {},
+            logs: [],
+            metrics: {
+                total: 0,
+                live: 0,
+                dead: 0,
+                ports: 0,
+                techs: 0
+            }
+        };
+
+        // ==================== LOGGING ====================
+        function addLog(message, level = 'info') {
+            const logEntry = {
+                time: new Date().toLocaleTimeString(),
+                message,
+                level
+            };
+            scanData.logs.unshift(logEntry);
+            
+            // Update log window if it exists
+            const logWindow = windows.find(w => w.options.type === 'log');
+            if (logWindow) {
+                updateLogWindow(logWindow.div);
+            }
+            
+            console.log(`[${level.toUpperCase()}] ${message}`);
+        }
+
+        // ==================== CREATE INITIAL WINDOWS ====================
+        function createInitialWindows() {
+            // Input window
+            createWindow(
+                '⚡ QUANTUM RECON CONTROL ⚡',
+                50, 50, 500, 250,
+                `
+                <div class="input-group">
+                    <input type="text" id="domain-input" class="crazy-input" placeholder="Enter target domain..." value="example.com">
+                    <button id="scan-btn" class="crazy-btn">SCAN</button>
+                </div>
+                <div class="status-bar">
+                    <div class="status-item">READY</div>
+                    <div class="status-item">0 TARGETS</div>
+                    <div class="status-item">QUANTUM STATE: ACTIVE</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px;">
+                    [SYSTEM] Quantum entanglement ready<br>
+                    [NETWORK] Neural interface online<br>
+                    [STATUS] Waiting for target...
+                </div>
+                `,
+                { type: 'control' }
+            );
+
+            // Subdomains window
+            createWindow(
+                '🌐 SUBDOMAIN DISCOVERY',
+                600, 30, 400, 500,
+                '<div id="subdomains-list">No data yet. Start a scan...</div>',
+                { type: 'subdomains' }
+            );
+
+            // Metrics window
+            createWindow(
+                '📊 LIVE METRICS',
+                200, 350, 350, 250,
+                `
+                <div class="metric-grid" id="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-total">0</div>
+                        <div class="metric-label">TOTAL</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-live">0</div>
+                        <div class="metric-label">LIVE</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-dead">0</div>
+                        <div class="metric-label">DEAD</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-ports">0</div>
+                        <div class="metric-label">PORTS</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="bar-chart" id="subdomain-chart"></div>
+                </div>
+                `,
+                { type: 'metrics' }
+            );
+
+            // Port scanner window
+            createWindow(
+                '🔌 PORT SCANNER',
+                1050, 200, 350, 300,
+                '<div id="ports-list" class="port-list"></div>',
+                { type: 'ports' }
+            );
+
+            // Technology window
+            createWindow(
+                '⚙️ TECHNOLOGY STACK',
+                1050, 520, 350, 200,
+                '<div id="tech-list"></div>',
+                { type: 'tech' }
+            );
+
+            // Headers window
+            createWindow(
+                '📋 HTTP HEADERS',
+                600, 550, 400, 250,
+                '<div id="headers-list"></div>',
+                { type: 'headers' }
+            );
+
+            // Log window
+            createWindow(
+                '📜 LIVE LOG',
+                50, 600, 500, 300,
+                '<div id="log-list"></div>',
+                { type: 'log' }
+            );
+
+            // Chart window
+            createWindow(
+                '📈 REAL-TIME ANALYSIS',
+                1050, 30, 350, 150,
+                '<canvas id="live-chart" width="300" height="100"></canvas>',
+                { type: 'chart' }
+            );
+
+            addLog('System initialized. Ready for scanning.', 'info');
+        }
+
+        // ==================== UPDATE FUNCTIONS ====================
+        function updateSubdomainsWindow() {
+            const subdomainsWindow = windows.find(w => w.options.type === 'subdomains');
+            if (!subdomainsWindow) return;
+
+            const listDiv = subdomainsWindow.div.querySelector('#subdomains-list');
+            if (!listDiv) return;
+
+            if (scanData.subdomains.length === 0) {
+                listDiv.innerHTML = 'No subdomains discovered yet...';
+                return;
+            }
+
+            let html = '';
+            scanData.subdomains.forEach(sub => {
+                html += `
+                    <div class="subdomain-item ${sub.isLive ? 'live' : 'dead'}" onclick="window.open('http://${sub.subdomain}', '_blank')">
+                        <span class="subdomain-name">${sub.subdomain}</span>
+                        <span class="subdomain-status">${sub.isLive ? 'LIVE' : 'DEAD'} ${sub.statusCode || ''}</span>
+                    </div>
+                    <div style="font-size: 9px; margin-left: 20px; color: #0f0; opacity: 0.7;">
+                        ${sub.isLive ? `IP: ${sub.ips?.join(', ') || 'N/A'} | Server: ${sub.server || 'N/A'} | ${sub.responseTime || '?'}ms` : ''}
+                    </div>
+                `;
+            });
+
+            listDiv.innerHTML = html;
+        }
+
+        function updateMetricsWindow() {
+            const metricsWindow = windows.find(w => w.options.type === 'metrics');
+            if (!metricsWindow) return;
+
+            const totalEl = metricsWindow.div.querySelector('#metric-total');
+            const liveEl = metricsWindow.div.querySelector('#metric-live');
+            const deadEl = metricsWindow.div.querySelector('#metric-dead');
+            const portsEl = metricsWindow.div.querySelector('#metric-ports');
+            const chartEl = metricsWindow.div.querySelector('#subdomain-chart');
+
+            if (totalEl) totalEl.textContent = scanData.metrics.total;
+            if (liveEl) liveEl.textContent = scanData.metrics.live;
+            if (deadEl) deadEl.textContent = scanData.metrics.dead;
+            if (portsEl) portsEl.textContent = scanData.metrics.ports;
+
+            if (chartEl) {
+                let chartHtml = '';
+                const max = Math.max(scanData.metrics.live, 1);
+                chartHtml += `<div class="bar" style="height: ${(scanData.metrics.live / max) * 100}px" data-value="${scanData.metrics.live}"></div>`;
+                chartHtml += `<div class="bar" style="height: ${(scanData.metrics.dead / max) * 100}px" data-value="${scanData.metrics.dead}"></div>`;
+                chartHtml += `<div class="bar" style="height: ${(scanData.metrics.ports / 100) * 100}px" data-value="${scanData.metrics.ports}"></div>`;
+                chartEl.innerHTML = chartHtml;
+            }
+        }
+
+        function updatePortsWindow() {
+            const portsWindow = windows.find(w => w.options.type === 'ports');
+            if (!portsWindow) return;
+
+            const portsList = portsWindow.div.querySelector('#ports-list');
+            if (!portsList) return;
+
+            let html = '';
+            const commonPorts = [21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445, 993, 995, 1723, 3306, 3389, 5900, 8080];
+            
+            commonPorts.forEach(port => {
+                const isOpen = Math.random() > 0.7; // Simulate for demo
+                html += `<div class="port-item ${isOpen ? 'open' : ''}">${port}</div>`;
+            });
+
+            portsList.innerHTML = html;
+        }
+
+        function updateTechWindow() {
+            const techWindow = windows.find(w => w.options.type === 'tech');
+            if (!techWindow) return;
+
+            const techList = techWindow.div.querySelector('#tech-list');
+            if (!techList) return;
+
+            const technologies = ['nginx', 'apache', 'node.js', 'react', 'python', 'java', 'php', 'mysql', 'redis', 'mongodb'];
+            let html = '';
+            
+            technologies.forEach(tech => {
+                html += `<span class="tech-tag">${tech}</span>`;
+            });
+
+            techList.innerHTML = html;
+        }
+
+        function updateHeadersWindow() {
+            const headersWindow = windows.find(w => w.options.type === 'headers');
+            if (!headersWindow) return;
+
+            const headersList = headersWindow.div.querySelector('#headers-list');
+            if (!headersList) return;
+
+            const headers = {
+                'Server': 'nginx/1.18.0',
+                'X-Powered-By': 'Express',
+                'Content-Type': 'text/html',
+                'Cache-Control': 'no-cache',
+                'X-Frame-Options': 'DENY',
+                'X-XSS-Protection': '1; mode=block'
+            };
+
+            let html = '';
+            Object.entries(headers).forEach(([key, value]) => {
+                html += `<div class="header-item"><strong>${key}:</strong> ${value}</div>`;
+            });
+
+            headersList.innerHTML = html;
+        }
+
+        function updateLogWindow(windowDiv) {
+            const logList = windowDiv.querySelector('#log-list');
+            if (!logList) return;
+
+            let html = '';
+            scanData.logs.slice(0, 50).forEach(log => {
+                html += `
+                    <div class="log-entry">
+                        <span class="log-time">[${log.time}]</span>
+                        <span class="log-level-${log.level}">${log.message}</span>
+                    </div>
+                `;
+            });
+
+            logList.innerHTML = html;
+        }
+
+        // ==================== SCAN FUNCTION ====================
+        async function startScan(domain) {
+            addLog(`Starting quantum reconnaissance on ${domain}`, 'info');
+            
+            // Clear old data
+            scanData.subdomains = [];
+            scanData.metrics = { total: 0, live: 0, dead: 0, ports: 0 };
+            
+            // Simulate scanning
+            const scanInterval = setInterval(() => {
+                // Generate random subdomain
+                const prefixes = ['api', 'dev', 'stage', 'test', 'admin', 'mail', 'blog', 'shop', 'app', 'cdn', 'static', 'assets', 'media', 'files', 'docs', 'help', 'support', 'forum', 'community', 'dashboard', 'analytics', 'metrics', 'logs', 'monitor', 'status', 'health', 'ping', 'graphql', 'rest', 'soap', 'ws', 'mqtt', 'smtp', 'imap', 'pop3', 'vpn', 'remote', 'gateway', 'proxy', 'tunnel', 'backup', 'archive', 'storage', 'snapshot', 'recovery'];
+                
+                const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                const randomNum = Math.floor(Math.random() * 1000);
+                const subdomain = `${randomPrefix}${randomNum}.${domain}`;
+                
+                const isLive = Math.random() > 0.4;
+                
+                scanData.subdomains.push({
+                    subdomain,
+                    isLive,
+                    ips: isLive ? [`192.168.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`] : [],
+                    statusCode: isLive ? [200, 301, 302, 403, 404, 500][Math.floor(Math.random() * 6)] : null,
+                    server: isLive ? ['nginx', 'apache', 'iis', 'caddy'][Math.floor(Math.random() * 4)] : null,
+                    responseTime: isLive ? Math.floor(Math.random() * 500) + 50 : null
+                });
+                
+                // Update metrics
+                scanData.metrics.total = scanData.subdomains.length;
+                scanData.metrics.live = scanData.subdomains.filter(s => s.isLive).length;
+                scanData.metrics.dead = scanData.subdomains.filter(s => !s.isLive).length;
+                scanData.metrics.ports = Math.floor(Math.random() * 1000);
+                
+                // Update all windows
+                updateSubdomainsWindow();
+                updateMetricsWindow();
+                updatePortsWindow();
+                updateTechWindow();
+                updateHeadersWindow();
+                
+                addLog(`Discovered ${scanData.subdomains[scanData.subdomains.length-1].subdomain}`, 'info');
+                
+                // Stop after 50 subdomains
+                if (scanData.subdomains.length >= 50) {
+                    clearInterval(scanInterval);
+                    addLog('Scan complete!', 'info');
+                }
+            }, 500);
+        }
+
+        // ==================== INITIALIZE ====================
+        createInitialWindows();
+
+        // Event listeners after windows are created
+        setTimeout(() => {
+            const scanBtn = document.getElementById('scan-btn');
+            const domainInput = document.getElementById('domain-input');
+
+            if (scanBtn && domainInput) {
+                scanBtn.addEventListener('click', () => {
+                    const domain = domainInput.value.trim();
+                    if (domain) {
+                        startScan(domain);
+                    }
+                });
+
+                domainInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const domain = domainInput.value.trim();
+                        if (domain) {
+                            startScan(domain);
+                        }
+                    }
+                });
+            }
+        }, 100);
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+        });
+
+        // Add some initial random windows for chaos
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const x = Math.random() * (window.innerWidth - 300);
+                const y = Math.random() * (window.innerHeight - 200);
+                createWindow(
+                    '💥 RANDOM DATA BURST',
+                    x, y, 250, 150,
+                    `
+                    <div style="font-size: 10px;">
+                        Quantum fluctuation detected!<br>
+                        Random entropy: ${Math.random().toString(16)}<br>
+                        Quantum state: ${Math.random() > 0.5 ? 'COLLAPSED' : 'SUPERPOSITION'}<br>
+                        Entanglement: ${(Math.random() * 100).toFixed(2)}%
+                    </div>
+                    `
+                );
+                
+                // Auto-close after 3 seconds
+                setTimeout(() => {
+                    const windows_ = document.querySelectorAll('.window');
+                    if (windows_.length > 10) {
+                        windows_[windows_.length - 1].remove();
+                    }
+                }, 3000);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
